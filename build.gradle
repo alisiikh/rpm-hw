@@ -1,0 +1,56 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id "nebula.rpm" version "4.8.0"
+}
+
+group 'com.alisiikh'
+version '1.0'
+
+ext {
+    pkgName = project.name
+    pkgVersion = project.version
+    pkgRelease = '1'
+
+    pkgUser = 'root'
+    pkgGroup = 'root'
+}
+
+task prepareRpm(type: Copy) {
+    from('script') {
+        filter(ReplaceTokens, tokens: [
+                pkg_name: pkgName,
+                pkg_version: pkgVersion
+        ])
+    }
+    into("$buildDir/rpm/script")
+}
+task buildRpm(type: Rpm) {
+    dependsOn('prepareRpm')
+    group = 'build'
+
+    packageName = pkgName
+    version = "${pkgVersion}.${pkgRelease}"
+    release = pkgRelease
+    arch = NOARCH
+    os = LINUX
+
+    user = pkgUser
+    packageGroup = pkgGroup
+
+    preInstall file("$buildDir/rpm/script/preinstall.sh")
+
+    requires('bash')
+
+    from('bin') {
+        include 'hw'
+        into("/usr/bin")
+        fileMode = 0755
+    }
+    from('bin/etc') {
+        into("/opt/hw")
+        fileMode = 644
+    }
+}
+
+
