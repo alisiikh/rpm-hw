@@ -1,46 +1,49 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
-    id "nebula.rpm" version "4.8.0"
+    id "nebula.ospackage" version "4.8.0"
 }
 
 group 'com.alisiikh'
 version '1.0'
 
 ext {
-    pkgName = project.name
-    pkgVersion = project.version
-    pkgRelease = '1'
+    rpm = [
+            tmpDir    : "$buildDir/tmp/buildRpm",
+            pkgName   : project.name,
+            pkgVersion: project.version,
+            pkgRelease: '1',
 
-    pkgUser = 'root'
-    pkgGroup = 'root'
+            pkgUser   : 'root',
+            pkgGroup  : 'root'
+    ]
 }
 
-task prepareRpm(type: Copy) {
+task prepareRpm(type: Copy, group: 'rpm', description: 'Prepares resources for RPM build.') {
     from('script') {
-        filter(ReplaceTokens, tokens: [
-                pkg_name: pkgName,
-                pkg_version: pkgVersion
-        ])
+        filter(ReplaceTokens, tokens: rpm)
     }
-    into("$buildDir/rpm/script")
+    into("${rpm['tmpDir']}/script")
 }
-task buildRpm(type: Rpm) {
-    dependsOn('prepareRpm')
-    group = 'build'
-
-    packageName = pkgName
-    version = "${pkgVersion}.${pkgRelease}"
-    release = pkgRelease
+ospackage {
+    packageName = rpm['pkgName']
+    version = "${rpm['pkgVersion']}.${rpm['pkgRelease']}"
+    release = rpm['pkgRelease']
     arch = NOARCH
     os = LINUX
 
-    user = pkgUser
-    packageGroup = pkgGroup
+    user = rpm['pkgUser']
+    packageGroup = rpm['pkgGroup']
 
-    preInstall file("$buildDir/rpm/script/preinstall.sh")
+    preInstall file("${rpm.tmpDir}/script/preinstall.sh")
 
     requires('bash')
+}
+buildRpm {
+    group ='rpm'
+    description = 'Builds RPM package.'
+
+    dependsOn 'prepareRpm'
 
     from('bin') {
         include 'hw'
@@ -49,8 +52,7 @@ task buildRpm(type: Rpm) {
     }
     from('bin/etc') {
         into("/opt/hw")
-        fileMode = 644
+        fileMode = 0644
     }
 }
-
-
+tasks.remove(buildDeb)

@@ -18,4 +18,4 @@ ENV RPM_WORKSPACE /opt/hw
 COPY --from=builder /opt/hw/build/distributions/ $RPM_WORKSPACE
 WORKDIR $RPM_WORKSPACE
 RUN rpm -i /opt/hw/rpm-hw-1.0.1-1.noarch.rpm
-CMD ["hw"]
+#CMD ["hw"]
