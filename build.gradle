@@ -24,20 +24,20 @@ task prepareRpm(type: Copy, group: 'rpm', description: 'Prepares resources for R
     from('rpm/script') {
         filter(ReplaceTokens, tokens: rpm)
     }
-    into("${rpm['buildDir']}/script")
+    into("${rpm.buildDir}/script")
 }
 task buildRpm(type: Rpm, dependsOn: 'prepareRpm', group: 'rpm', description: 'Builds RPM package.') {
-    packageName = rpm['pkgName']
-    version = "${rpm['pkgVersion']}.${rpm['pkgRelease']}"
-    release = rpm['pkgRelease']
+    packageName = rpm.pkgName
+    version = "${rpm.pkgVersion}.${rpm.pkgRelease}"
+    release = rpm.pkgRelease
     arch = NOARCH
     os = LINUX
 
-    user = rpm['pkgUser']
-    packageGroup = rpm['pkgGroup']
+    user = rpm.pkgUser
+    packageGroup = rpm.pkgGroup
 
-    dirMode = rpm['pkgDirMode'] as int
-    fileMode = rpm['pkgFileMode'] as int
+    dirMode = rpm.pkgDirMode as int
+    fileMode = rpm.pkgFileMode as int
 
     preInstall file("${rpm.buildDir}/script/preinstall.sh")
     postInstall file("${rpm.buildDir}/script/postinstall.sh")
