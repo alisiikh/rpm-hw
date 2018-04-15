@@ -1,6 +1,6 @@
 ## RPM packaging using Gradle
 
-Since the 'nebula.rpm' Gradle plugin uses redline RPM packaging library
+Since the 'nebula.rpm' Gradle plugin uses [redline RPM](https://github.com/craigwblake/redline) packaging library
 that is fully implemented in Java and doesn't require RPM packaging binaries,
 there are some limitations like you can't use macroses in your build.
 
